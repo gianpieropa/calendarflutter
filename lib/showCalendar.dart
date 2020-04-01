@@ -7,8 +7,10 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/content/v2_1.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:googleapis/calendar/v3.dart' as ca;
+import 'package:random_color/random_color.dart';
 
 class ShowCalendar extends StatefulWidget {
   ShowCalendar({Key key, this.title}) : super(key: key);
@@ -32,23 +34,13 @@ class _ShowCalendarState extends State<ShowCalendar> {
   DateTime _currentDate = DateTime.now();
   DateTime _currentDate2 = DateTime.now();
   String _currentMonth = DateFormat.yMMM().format(DateTime.now());
-  DateTime _targetDateTime = DateTime(2019, 2, 3);
+  DateTime _targetDateTime = DateTime.now();
   List<Event> currentEvents;
   final String title;
+  RandomColor _randomColor = RandomColor();
 //  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
 
   _ShowCalendarState({this.title});
-
-  static Widget _eventIcon = new Container(
-    decoration: new BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(1000)),
-        border: Border.all(color: Colors.blue, width: 2.0)),
-    child: new Icon(
-      Icons.person,
-      color: Colors.amber,
-    ),
-  );
 
   Future<EventList<Event>> _fetchEvents() async {
     EventList<Event> markedDateMap = new EventList<Event>(events: {});
@@ -78,21 +70,15 @@ class _ShowCalendarState extends State<ShowCalendar> {
           data = value.items[i].end.date;
         }
         markedDateMap.events.putIfAbsent(data, () => []);
-        stringa =value.items[i].summary;
-        if(value.items[i].summary == null){
+        stringa = value.items[i].summary;
+        if (value.items[i].summary == null) {
           stringa = "(Senza titolo)";
         }
-        markedDateMap.events[data].add(new Event(
-          date: data,
-          title: stringa,
-          
-          
-        ));
+        markedDateMap.events[data].add(new Event(date: data, title: stringa));
       }
     });
     return markedDateMap;
   }
-  
 
   EventList<Event> _markedDateMap;
   CalendarCarousel _calendarCarousel;
@@ -116,55 +102,61 @@ class _ShowCalendarState extends State<ShowCalendar> {
         events.forEach((event) => print(event.title));
         setState(() {
           currentEvents = events;
+          _currentDate2 = date;
         });
       },
-      childAspectRatio: 1.4,
-      showIconBehindDayText: false,
-      daysHaveCircularBorder: false,
-      showOnlyCurrentMonthDate: false,
-      weekendTextStyle: TextStyle(
-          fontSize: 15, color: Colors.red[400], fontWeight: FontWeight.bold),
-      locale: 'it',
-      daysTextStyle: TextStyle(
-          fontSize: 15, color: Colors.black, fontWeight: FontWeight.bold),
       todayButtonColor: Colors.transparent,
-      weekFormat: false,
-      weekdayTextStyle:
-          TextStyle(color: Colors.grey[500], fontWeight: FontWeight.bold),
       markedDatesMap: _markedDateMap,
-      height: 320.0,
-      headerTextStyle: TextStyle(
-          fontSize: 20, color: Colors.blue, fontWeight: FontWeight.bold),
-      selectedDateTime: _currentDate2,
+      markedDateShowIcon: true,
+      markedDateIconMaxShown: 1,
+      markedDateIconBuilder: (event) {
+        return Container(
+            alignment: Alignment.center,
+            decoration: new BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Text(
+              event.date.day.toString(),
+              style: TextStyle(color: Colors.white),
+            ));
+      },
+      selectedDayButtonColor: Colors.blue,
       selectedDayBorderColor: Colors.transparent,
-      selectedDayButtonColor: Colors.transparent,
-      targetDateTime: _targetDateTime,
-      customGridViewPhysics: NeverScrollableScrollPhysics(),
-      markedDateCustomTextStyle: TextStyle(
-          fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
-      showHeader: true,
-      // markedDateIconBuilder: (event) {
-      //   return Container(
-      //     color: Colors.blue,
-      //   );
-      // },
-      todayTextStyle: TextStyle(
-        color: Colors.blue,
-        fontWeight: FontWeight.bold,
-        fontSize: 15,
-      ),
+      selectedDateTime: _currentDate2,
       selectedDayTextStyle: TextStyle(
-          color: Colors.yellow[900], fontWeight: FontWeight.bold, fontSize: 15),
-      minSelectedDate: _currentDate.subtract(Duration(days: 360)),
-      maxSelectedDate: _currentDate.add(Duration(days: 360)),
-      prevDaysTextStyle: TextStyle(
-          fontSize: 15, color: Colors.grey[500], fontWeight: FontWeight.bold),
-      nextDaysTextStyle: TextStyle(
-          fontSize: 15, color: Colors.grey[500], fontWeight: FontWeight.bold),
-      inactiveDaysTextStyle: TextStyle(
-        color: Colors.tealAccent,
-        fontSize: 16,
+        color: Colors.white,
       ),
+      headerTextStyle: TextStyle(
+          color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+      pageSnapping: true,
+      weekFormat: false,
+      showHeader: true,
+      thisMonthDayBorderColor: Colors.grey,
+
+      height: MediaQuery.of(context).orientation == Orientation.portrait
+          ? 380
+          : 490,
+      childAspectRatio:
+          MediaQuery.of(context).orientation == Orientation.portrait
+              ? 1.0
+              : 1.5,
+      targetDateTime: _targetDateTime,
+
+      /// weekday
+      weekdayTextStyle: TextStyle(
+          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+      weekendTextStyle: TextStyle(
+          color: Theme.of(context).primaryColorLight,
+          fontWeight: FontWeight.bold,
+          fontSize: 17),
+      daysTextStyle: TextStyle(
+          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+      todayTextStyle: TextStyle(
+        color: Theme.of(context).primaryColor,
+      ),
+      minSelectedDate: DateTime(1970, 1, 1),
+      maxSelectedDate: DateTime.now().add(Duration(days: 3650)),
       onCalendarChanged: (DateTime date) {
         this.setState(() {
           _targetDateTime = date;
@@ -177,18 +169,18 @@ class _ShowCalendarState extends State<ShowCalendar> {
     );
 
     return new Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blue,
         appBar: AppBar(
           leading: new IconButton(
             icon: new Icon(
               Icons.arrow_back,
               size: 30,
-              color: Colors.blue,
+              color: Colors.white,
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
           elevation: 0.0,
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.blue,
         ),
         body: Column(children: <Widget>[
           SingleChildScrollView(
@@ -196,15 +188,16 @@ class _ShowCalendarState extends State<ShowCalendar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                /* 
                 Container(
                   padding: EdgeInsets.only(left: 20, top: 30),
                   alignment: Alignment.centerLeft,
-                  child: Text("Calendario",
+                child: Text("Calendario",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 30,
                           color: Colors.blue)),
-                ),
+                ),*/
                 //custom icon
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 16.0),
@@ -213,26 +206,49 @@ class _ShowCalendarState extends State<ShowCalendar> {
               ],
             ),
           ),
-          Container(
-            height: 180.0,
-            padding: EdgeInsets.only(top: 30),
-            child: FutureBuilder(
-              future: _getEventsList(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Event> data = snapshot.data;
-                  return Container(
-                    child: _calendarsListView(data),
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
-                return Container();
-              },
+          SizedBox(
+            height: 50,
+            child: ListWheelScrollView(
+           itemExtent: 40,
+              children: <Widget>[
+                Text(_currentMonth,style: TextStyle(
+          color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
+                Text(_currentMonth,style: TextStyle(
+          color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30)),
+                color: Colors.white,
+              ),
+              height: 180.0,
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(top: 30),
+              child: FutureBuilder(
+                future: _getEventsList(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<Event> data = snapshot.data;
+                    return SizedBox(
+                      height: 150,
+                      child: _calendarsListView(data),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          )
         ]));
   }
+  
 
   ListView _calendarsListView(data) {
     return ListView.builder(
@@ -244,41 +260,47 @@ class _ShowCalendarState extends State<ShowCalendar> {
   }
 
   Ink _tile(String title, IconData icon, context) => Ink(
-      child: InkWell(
-          splashColor: Colors.blue,
-          child: Container(
-            padding: EdgeInsets.all(30),
-            margin: EdgeInsets.all(10),
-            width: 180,
-            decoration: BoxDecoration(
-               gradient: LinearGradient(begin:Alignment.topLeft ,end:Alignment.bottomRight,colors: [Colors.blue[600],Colors.blue,Colors.tealAccent[400],Colors.tealAccent[700]]),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              color: Colors.blue,
-              boxShadow: [
-                new BoxShadow(
-                  color: Colors.grey,
-                  blurRadius: 10.0,
-                  offset: Offset(5, 5),
-                ),
-              ],
-            ),
-            child: Row(
-              children: <Widget>[
-                Flexible(
-                    child: Column(
-                  children: <Widget>[
-                    Text(
-                      title,
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 20,
-                          color: Colors.white),
-                    ),
-                  ],
-                ))
-              ],
-            ),
-          )));
+          child: InkWell(
+        splashColor: Colors.blue,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          margin: EdgeInsets.all(10),
+          width: 180,
+          decoration: BoxDecoration(
+            /*
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.blue[600],
+                    Colors.blue,
+                    Colors.tealAccent[400],
+                    Colors.tealAccent[700]
+                  ]),*/
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            color: _randomColor.randomColor(
+                colorBrightness: ColorBrightness.light),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Icon(
+                Icons.calendar_today,
+                size: 30,
+                color: Colors.white,
+              ),
+              SizedBox(height: 30),
+              Text(
+                title,
+                style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20,
+                    color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ));
 
   Future<List<Event>> _getEventsList() async {
     var values = currentEvents;

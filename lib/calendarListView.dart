@@ -28,7 +28,11 @@ class CalendarListView extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
         }
-        return CircularProgressIndicator();
+        return SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(),
+        );
       },
     );
   }
@@ -63,17 +67,20 @@ class CalendarListView extends StatelessWidget {
     return ListView.builder(
         itemCount: data.length,
         itemBuilder: (context, index) {
-          return _tile(data[index], Icons.work,context);
+          return _tile(data[index], Icons.work, context);
         });
   }
 
-  Ink _tile(String title, IconData icon,context) => Ink(
+  Ink _tile(String title, IconData icon, context) => Ink(
       child: InkWell(
           splashColor: Colors.blue,
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ShowCalendar(title: title,)),
+              MaterialPageRoute(
+                  builder: (context) => ShowCalendar(
+                        title: title,
+                      )),
             );
           },
           child: Container(
