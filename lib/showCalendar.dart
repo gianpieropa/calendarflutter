@@ -7,13 +7,15 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/cloudsearch/v1.dart';
 import 'package:googleapis/content/v2_1.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:googleapis/calendar/v3.dart' as ca;
 import 'package:random_color/random_color.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 
 class ShowCalendar extends StatefulWidget {
-  ShowCalendar({Key key, this.title}) : super(key: key);
+  ShowCalendar({Key key, this.title, this.months}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -25,22 +27,26 @@ class ShowCalendar extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  final List<String> months;
 
   @override
-  _ShowCalendarState createState() => new _ShowCalendarState(title: title);
+  _ShowCalendarState createState() =>
+      new _ShowCalendarState(title: title, months: months);
 }
 
 class _ShowCalendarState extends State<ShowCalendar> {
-  DateTime _currentDate = DateTime.now();
   DateTime _currentDate2 = DateTime.now();
-  String _currentMonth = DateFormat.yMMM().format(DateTime.now());
+  int _currentYear = DateTime.now().year;
   DateTime _targetDateTime = DateTime.now();
   List<Event> currentEvents;
   final String title;
+  final List<String> months;
+  int oldindex = 0;
   RandomColor _randomColor = RandomColor();
+
 //  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
 
-  _ShowCalendarState({this.title});
+  _ShowCalendarState({this.title, this.months});
 
   Future<EventList<Event>> _fetchEvents() async {
     EventList<Event> markedDateMap = new EventList<Event>(events: {});
@@ -64,10 +70,10 @@ class _ShowCalendarState extends State<ShowCalendar> {
     await calendar.events.list(title).then((value) {
       for (var i = 0; i < value.items.length; i++) {
         print(value.items[i].toJson());
-        if (value.items[i].end.dateTime != null) {
-          data = value.items[i].end.dateTime;
+        if (value.items[i].start.dateTime != null) {
+          data = value.items[i].start.dateTime;
         } else {
-          data = value.items[i].end.date;
+          data = value.items[i].start.date;
         }
         markedDateMap.events.putIfAbsent(data, () => []);
         stringa = value.items[i].summary;
@@ -86,6 +92,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
   @override
   void initState() {
     super.initState();
+
     _fetchEvents().then((value) {
       setState(() {
         _markedDateMap = value;
@@ -99,7 +106,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
       todayBorderColor: Colors.transparent,
       onDayPressed: (DateTime date, List<Event> events) {
         //this.setState(() => _currentDate2 = date);
-        events.forEach((event) => print(event.title));
+        // events.forEach((event) => print(event.title));
         setState(() {
           currentEvents = events;
           _currentDate2 = date;
@@ -113,12 +120,12 @@ class _ShowCalendarState extends State<ShowCalendar> {
         return Container(
             alignment: Alignment.center,
             decoration: new BoxDecoration(
-              color: Colors.blue,
+              color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             child: Text(
               event.date.day.toString(),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.blue),
             ));
       },
       selectedDayButtonColor: Colors.blue,
@@ -131,7 +138,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
           color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
       pageSnapping: true,
       weekFormat: false,
-      showHeader: true,
+      showHeader: false,
       thisMonthDayBorderColor: Colors.grey,
 
       height: MediaQuery.of(context).orientation == Orientation.portrait
@@ -160,9 +167,9 @@ class _ShowCalendarState extends State<ShowCalendar> {
       onCalendarChanged: (DateTime date) {
         this.setState(() {
           _targetDateTime = date;
-          _currentMonth = DateFormat.yMMM().format(_targetDateTime);
         });
       },
+      isScrollable: false,
       onDayLongPressed: (DateTime date) {
         print('long pressed date $date');
       },
@@ -171,6 +178,16 @@ class _ShowCalendarState extends State<ShowCalendar> {
     return new Scaffold(
         backgroundColor: Colors.blue,
         appBar: AppBar(
+          actions: <Widget>[
+            Container(
+              margin: EdgeInsets.only(top:15,right:10),
+              child: Text(_currentYear.toString(),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20)),
+            )
+          ],
           leading: new IconButton(
             icon: new Icon(
               Icons.arrow_back,
@@ -183,6 +200,50 @@ class _ShowCalendarState extends State<ShowCalendar> {
           backgroundColor: Colors.blue,
         ),
         body: Column(children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(bottom: 30),
+            alignment: Alignment.center,
+            height: 50,
+            child: new Swiper(
+              itemBuilder: (BuildContext context, int index) {
+                return new Container(
+                    alignment: Alignment.center,
+                    child: Text(this.months[index],
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold)));
+              },
+              itemCount: months.length,
+              pagination: null,
+              control: null,
+              viewportFraction: 0.48,
+              fade: 0.05,
+              scale: 0.3,
+              onIndexChanged: (index) {
+                //SwiperController().next();
+
+                setState(() {
+                  if ((index >= oldindex && (index - oldindex != 11)) ||
+                      (index - oldindex == -11)) {
+                    _targetDateTime = DateTime(
+                        _targetDateTime.year, _targetDateTime.month + 1);
+                    print(index);
+                    print(oldindex);
+                    print(_targetDateTime);
+                    oldindex = index;
+                  } else {
+                    _targetDateTime = DateTime(
+                        _targetDateTime.year, _targetDateTime.month - 1);
+                    print(index);
+                    print(oldindex);
+                    print(_targetDateTime);
+                    oldindex = index;
+                  }
+                });
+              },
+            ),
+          ),
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,18 +264,6 @@ class _ShowCalendarState extends State<ShowCalendar> {
                   margin: EdgeInsets.symmetric(horizontal: 16.0),
                   child: _calendarCarousel,
                 ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 50,
-            child: ListWheelScrollView(
-           itemExtent: 40,
-              children: <Widget>[
-                Text(_currentMonth,style: TextStyle(
-          color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
-                Text(_currentMonth,style: TextStyle(
-          color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -248,7 +297,6 @@ class _ShowCalendarState extends State<ShowCalendar> {
           )
         ]));
   }
-  
 
   ListView _calendarsListView(data) {
     return ListView.builder(
@@ -289,7 +337,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                 size: 30,
                 color: Colors.white,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 10),
               Text(
                 title,
                 style: TextStyle(
@@ -304,7 +352,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
 
   Future<List<Event>> _getEventsList() async {
     var values = currentEvents;
-    print(currentEvents);
+    //print(currentEvents);
     //await Future.delayed(Duration(seconds: 2));
 
     return values;

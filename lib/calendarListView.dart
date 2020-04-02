@@ -36,7 +36,36 @@ class CalendarListView extends StatelessWidget {
       },
     );
   }
-
+ List<String> _ordinaMesi() {
+   List<String> months = [
+    'Gennaio',
+    'Febbraio',
+    'Marzo',
+    'Aprile',
+    'Maggio',
+    'Giugno',
+    'Luglio',
+    'Agosto',
+    'Settembre',
+    'Ottobre',
+    'Novembre',
+    'Dicembre'
+  ];
+    var nuovimesi = List<String>(12);
+    int currentMonth = DateTime.now().month;
+    for(int i= 0;i< 12; i++){
+      if(currentMonth > 12){
+        currentMonth=1;
+      }
+      nuovimesi[i]=months[currentMonth-1];
+      currentMonth++;
+    }
+    for(int i= 0;i< 12; i++){
+     print(nuovimesi[i]);
+    }
+    return nuovimesi;
+    
+  }
   Future<List<String>> _fetchCalendars() async {
     List<String> calendarlist = List<String>();
     final _googleSignIn =
@@ -79,7 +108,7 @@ class CalendarListView extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) => ShowCalendar(
-                        title: title,
+                        title: title,months: _ordinaMesi(),
                       )),
             );
           },
