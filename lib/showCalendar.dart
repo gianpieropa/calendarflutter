@@ -232,6 +232,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                     print(oldindex);
                     print(_targetDateTime);
                     oldindex = index;
+                    _currentYear = _targetDateTime.year;
                   } else {
                     _targetDateTime = DateTime(
                         _targetDateTime.year, _targetDateTime.month - 1);
@@ -239,6 +240,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                     print(oldindex);
                     print(_targetDateTime);
                     oldindex = index;
+                     _currentYear = _targetDateTime.year;
                   }
                 });
               },
