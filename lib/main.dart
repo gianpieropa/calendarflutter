@@ -21,13 +21,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Google Drive',
       theme: ThemeData(
-        primarySwatch: Colors.indigo,
+        primarySwatch: Colors.blue,
       ),
       home: BlocProvider<EventoListBloc>(create: (context) {
         return EventoListBloc()..add(GetEventos());
       },
-      child: ShowCalendar(title: "Homepage",),
-  )
+      child:SafeArea(
+                top: true,
+                bottom: true,
+                child:  ShowCalendar(title: "Homepage",),
+  ))
     );
   }
 }

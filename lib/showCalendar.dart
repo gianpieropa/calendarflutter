@@ -1,5 +1,6 @@
 import 'package:calendar/blocs/blocs.dart';
 import 'package:calendar/models/evento_model.dart';
+import 'package:calendar/screens/addeventoform_screen.dart';
 import 'package:calendar/widgets/eventi_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,7 +86,10 @@ class _ShowCalendarState extends State<ShowCalendar> {
         _calendarCarousel = CalendarCarousel<Event>(
           todayBorderColor: Colors.transparent,
           onDayPressed: (DateTime date, List<Event> events) {
-            _pc.open();
+            this.setState(() {
+              _currentDate = date;
+            });
+            //_pc.open();
             // BlocProvider.of<EventoListBloc>(context).add(AddEvento(evento:Evento(dataFine: date,dataInizio: date,descrizione: "agginto")));
           },
           todayButtonColor: Colors.transparent,
@@ -96,12 +100,12 @@ class _ShowCalendarState extends State<ShowCalendar> {
             return Container(
                 alignment: Alignment.center,
                 decoration: new BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
                 ),
                 child: Text(
                   event.date.day.toString(),
-                  style: TextStyle(color: Colors.blue),
+                  style: TextStyle(color: Colors.white, fontSize: 12),
                 ));
           },
           selectedDayButtonColor: Colors.blue,
@@ -115,24 +119,22 @@ class _ShowCalendarState extends State<ShowCalendar> {
           pageSnapping: true,
           weekFormat: false,
           showHeader: false,
-          thisMonthDayBorderColor: Colors.grey,
 
-          height: _size.height * 0.40,
-          childAspectRatio:
-              MediaQuery.of(context).orientation == Orientation.portrait
-                  ? 1.0
-                  : 1.5,
+          height: 270,
+          childAspectRatio: 0.8,
           targetDateTime: _targetDateTime,
 
           /// weekday
           weekdayTextStyle: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+              color: Colors.grey[400],
+              fontWeight: FontWeight.w500,
+              fontSize: 17),
           weekendTextStyle: TextStyle(
               color: Theme.of(context).primaryColorLight,
               fontWeight: FontWeight.bold,
               fontSize: 17),
           daysTextStyle: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+              color: Colors.black, fontWeight: FontWeight.w500, fontSize: 14),
           todayTextStyle: TextStyle(
             color: Theme.of(context).primaryColor,
           ),
@@ -144,12 +146,13 @@ class _ShowCalendarState extends State<ShowCalendar> {
             });
           },
           isScrollable: false,
+
           onDayLongPressed: (DateTime date) {},
         );
 
         return new Scaffold(
             backgroundColor: Colors.blue,
-          /*  bottomNavigationBar: BottomNavigationBar(
+            /*  bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
@@ -176,15 +179,23 @@ class _ShowCalendarState extends State<ShowCalendar> {
               elevation: 0.0,
               backgroundColor: Colors.blue,
             ),
-            body:SafeArea(top:true,bottom:true,child: SlidingUpPanel(
-                minHeight: 0,
-                controller: _pc,
-                panel: Center(
-                  child: Text("This is the sliding Widget"),
+            body: SlidingUpPanel(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
                 ),
-                body: Column(children: <Widget>[
-                  Expanded(flex: 2,child:
+                minHeight: 0,
+                maxHeight: 300,
+                controller: _pc,
+                panel: BlocProvider(
+                  create: (context) => AddFormBloc(),
+                  child: AddForm(),
+                ),
+                body: SingleChildScrollView(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: <
+                        Widget>[
                   Container(
+                    height: 50,
                     margin: EdgeInsets.only(bottom: 30),
                     alignment: Alignment.center,
                     child: new Swiper(
@@ -220,34 +231,40 @@ class _ShowCalendarState extends State<ShowCalendar> {
                         });
                       },
                     ),
-                  ),),
-                  Expanded(flex: 2,
-                    child: 
-                  SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 30.0),
-                          child: _calendarCarousel,
-                        ),
-                      ],
-                    ),
-                  ),),
-                   Expanded(child:Container(
+                  ),
+                  Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30)),
-                      color: Colors.white,
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(24.0))),
+                    margin: EdgeInsets.symmetric(horizontal: 30.0),
+                    padding: EdgeInsets.all(30.0),
+                    child: _calendarCarousel,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                          margin: EdgeInsets.all(30),
+                          child: Text(
+                            "Eventi",
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          )),
+                      Container(
+                          margin: EdgeInsets.all(30),
+                          child: IconButton(
+                            icon: Icon(Icons.add, color: Colors.white),
+                            onPressed: () {
+                              _pc.open();
+                            },
+                          )),
+                    ],
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: EventiList(
+                      eventi: state.eventi,
                     ),
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.only(top: 30),
-                    child: Align(
-                        alignment: Alignment.center,
-                        child: EventiList(eventi: state.eventi)),
-                  ))
+                  )
                 ]))));
       } else if (state is Loading) {
         return Container(

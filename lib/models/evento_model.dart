@@ -6,12 +6,12 @@ Evento eventoFromJson(String str) => Evento.fromMap(json.decode(str));
 
 String eventoToJson(Evento data) => json.encode(data.toMap());
 
-class Evento extends Equatable {
-  final int id;
-  final String descrizione;
-  final DateTime dataInizio;
-  final DateTime dataFine;
-  final String labelColor;
+class Evento {
+  int id;
+  String descrizione;
+  DateTime dataInizio;
+   DateTime dataFine;
+  String labelColor;
 
   Evento({
     this.id,
@@ -20,9 +20,7 @@ class Evento extends Equatable {
     this.dataFine,
     this.labelColor,
   });
-  @override
-  List<Object> get props => [id, descrizione, dataInizio, dataFine];
-
+  
   factory Evento.fromMap(Map<String, dynamic> json) => Evento(
         id: json["id"],
         descrizione: json["descrizione"],

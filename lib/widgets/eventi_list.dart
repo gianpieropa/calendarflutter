@@ -11,6 +11,9 @@ class EventiList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       return ListView.builder(
+       // scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        physics: ClampingScrollPhysics(),
           itemCount: eventi.length,
           itemBuilder: (BuildContext context, int index) {
             Evento evento = eventi[index];
