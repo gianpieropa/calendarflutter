@@ -1,362 +1,263 @@
-import 'package:calendar/http_client.dart';
+import 'package:calendar/blocs/blocs.dart';
+import 'package:calendar/models/evento_model.dart';
+import 'package:calendar/widgets/eventi_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/cloudsearch/v1.dart';
-import 'package:googleapis/content/v2_1.dart';
-import 'package:intl/intl.dart' show DateFormat;
-import 'package:googleapis/calendar/v3.dart' as ca;
-import 'package:random_color/random_color.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:calendar/blocs/evento/evento.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class ShowCalendar extends StatefulWidget {
-  ShowCalendar({Key key, this.title, this.months}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  ShowCalendar({Key key, this.title}) : super(key: key);
 
   final String title;
-  final List<String> months;
 
   @override
-  _ShowCalendarState createState() =>
-      new _ShowCalendarState(title: title, months: months);
+  _ShowCalendarState createState() => new _ShowCalendarState(title: title);
 }
 
 class _ShowCalendarState extends State<ShowCalendar> {
-  DateTime _currentDate2 = DateTime.now();
+  DateTime _currentDate = DateTime.now();
   int _currentYear = DateTime.now().year;
   DateTime _targetDateTime = DateTime.now();
   List<Event> currentEvents;
   final String title;
-  final List<String> months;
+  List<String> months;
   int oldindex = 0;
-  RandomColor _randomColor = RandomColor();
-
-//  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
-
-  _ShowCalendarState({this.title, this.months});
-
-  Future<EventList<Event>> _fetchEvents() async {
-    EventList<Event> markedDateMap = new EventList<Event>(events: {});
-
-    final _googleSignIn = new GoogleSignIn(
-        scopes: ['https://www.googleapis.com/auth/calendar.events']);
-    try {
-      final account = await _googleSignIn.signInSilently();
-      print("Successfully signed in as ${account.displayName}.");
-    } catch (e) {
-      // User not signed in yet. Do something appropriate.
-      print("The user is not signed in yet. Asking to sign in.");
-      _googleSignIn.signIn();
-    }
-    final authHeaders = await _googleSignIn.currentUser.authHeaders;
-
-    final httpClient = GoogleHttpClient(authHeaders);
-    DateTime data;
-    String stringa;
-    var calendar = ca.CalendarApi(httpClient);
-    await calendar.events.list(title).then((value) {
-      for (var i = 0; i < value.items.length; i++) {
-        print(value.items[i].toJson());
-        if (value.items[i].start.dateTime != null) {
-          data = value.items[i].start.dateTime;
-        } else {
-          data = value.items[i].start.date;
-        }
-        markedDateMap.events.putIfAbsent(data, () => []);
-        stringa = value.items[i].summary;
-        if (value.items[i].summary == null) {
-          stringa = "(Senza titolo)";
-        }
-        markedDateMap.events[data].add(new Event(date: data, title: stringa));
-      }
-    });
-    return markedDateMap;
-  }
-
-  EventList<Event> _markedDateMap;
+  EventList<Event> _markedDateMap = new EventList<Event>(events: {});
   CalendarCarousel _calendarCarousel;
+  PanelController _pc = new PanelController();
+
+  _ShowCalendarState({this.title});
 
   @override
   void initState() {
     super.initState();
+    months = _ordinaMesi();
+  }
 
-    _fetchEvents().then((value) {
-      setState(() {
-        _markedDateMap = value;
-      });
-    });
+  List<String> _ordinaMesi() {
+    List<String> months = [
+      'Gennaio',
+      'Febbraio',
+      'Marzo',
+      'Aprile',
+      'Maggio',
+      'Giugno',
+      'Luglio',
+      'Agosto',
+      'Settembre',
+      'Ottobre',
+      'Novembre',
+      'Dicembre'
+    ];
+    var nuovimesi = List<String>(12);
+    int currentMonth = DateTime.now().month;
+    for (int i = 0; i < 12; i++) {
+      if (currentMonth > 12) {
+        currentMonth = 1;
+      }
+      nuovimesi[i] = months[currentMonth - 1];
+      currentMonth++;
+    }
+    for (int i = 0; i < 12; i++) {
+      print(nuovimesi[i]);
+    }
+    return nuovimesi;
   }
 
   @override
   Widget build(BuildContext context) {
-    _calendarCarousel = CalendarCarousel<Event>(
-      todayBorderColor: Colors.transparent,
-      onDayPressed: (DateTime date, List<Event> events) {
-        //this.setState(() => _currentDate2 = date);
-        // events.forEach((event) => print(event.title));
-        setState(() {
-          currentEvents = events;
-          _currentDate2 = date;
-        });
-      },
-      todayButtonColor: Colors.transparent,
-      markedDatesMap: _markedDateMap,
-      markedDateShowIcon: true,
-      markedDateIconMaxShown: 1,
-      markedDateIconBuilder: (event) {
-        return Container(
-            alignment: Alignment.center,
-            decoration: new BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Text(
-              event.date.day.toString(),
-              style: TextStyle(color: Colors.blue),
-            ));
-      },
-      selectedDayButtonColor: Colors.blue,
-      selectedDayBorderColor: Colors.transparent,
-      selectedDateTime: _currentDate2,
-      selectedDayTextStyle: TextStyle(
-        color: Colors.white,
-      ),
-      headerTextStyle: TextStyle(
-          color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
-      pageSnapping: true,
-      weekFormat: false,
-      showHeader: false,
-      thisMonthDayBorderColor: Colors.grey,
-
-      height: MediaQuery.of(context).orientation == Orientation.portrait
-          ? 380
-          : 490,
-      childAspectRatio:
-          MediaQuery.of(context).orientation == Orientation.portrait
-              ? 1.0
-              : 1.5,
-      targetDateTime: _targetDateTime,
-
-      /// weekday
-      weekdayTextStyle: TextStyle(
-          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
-      weekendTextStyle: TextStyle(
-          color: Theme.of(context).primaryColorLight,
-          fontWeight: FontWeight.bold,
-          fontSize: 17),
-      daysTextStyle: TextStyle(
-          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
-      todayTextStyle: TextStyle(
-        color: Theme.of(context).primaryColor,
-      ),
-      minSelectedDate: DateTime(1970, 1, 1),
-      maxSelectedDate: DateTime.now().add(Duration(days: 3650)),
-      onCalendarChanged: (DateTime date) {
-        this.setState(() {
-          _targetDateTime = date;
-        });
-      },
-      isScrollable: false,
-      onDayLongPressed: (DateTime date) {
-        print('long pressed date $date');
-      },
-    );
-
-    return new Scaffold(
-        backgroundColor: Colors.blue,
-        appBar: AppBar(
-          actions: <Widget>[
-            Container(
-              margin: EdgeInsets.only(top:15,right:10),
-              child: Text(_currentYear.toString(),
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20)),
-            )
-          ],
-          leading: new IconButton(
-            icon: new Icon(
-              Icons.arrow_back,
-              size: 30,
-              color: Colors.white,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
+    final _size = MediaQuery.of(context).size;
+    return BlocBuilder<EventoListBloc, EventoListState>(
+        builder: (context, state) {
+      if (state is Loaded) {
+        var eventi = state.eventi;
+        for (var i = 0; i < eventi.length; i++) {
+          _markedDateMap.events.putIfAbsent(eventi[i].dataInizio, () => []);
+          _markedDateMap.events[eventi[i].dataInizio].add(new Event(
+              date: eventi[i].dataInizio, title: eventi[i].descrizione));
+        }
+        _calendarCarousel = CalendarCarousel<Event>(
+          todayBorderColor: Colors.transparent,
+          onDayPressed: (DateTime date, List<Event> events) {
+            _pc.open();
+            // BlocProvider.of<EventoListBloc>(context).add(AddEvento(evento:Evento(dataFine: date,dataInizio: date,descrizione: "agginto")));
+          },
+          todayButtonColor: Colors.transparent,
+          markedDatesMap: _markedDateMap,
+          markedDateShowIcon: true,
+          markedDateIconMaxShown: 1,
+          markedDateIconBuilder: (event) {
+            return Container(
+                alignment: Alignment.center,
+                decoration: new BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Text(
+                  event.date.day.toString(),
+                  style: TextStyle(color: Colors.blue),
+                ));
+          },
+          selectedDayButtonColor: Colors.blue,
+          selectedDayBorderColor: Colors.transparent,
+          selectedDateTime: _currentDate,
+          selectedDayTextStyle: TextStyle(
+            color: Colors.white,
           ),
-          elevation: 0.0,
-          backgroundColor: Colors.blue,
-        ),
-        body: Column(children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(bottom: 30),
-            alignment: Alignment.center,
-            height: 50,
-            child: new Swiper(
-              itemBuilder: (BuildContext context, int index) {
-                return new Container(
-                    alignment: Alignment.center,
-                    child: Text(this.months[index],
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold)));
-              },
-              itemCount: months.length,
-              pagination: null,
-              control: null,
-              viewportFraction: 0.48,
-              fade: 0.05,
-              scale: 0.3,
-              onIndexChanged: (index) {
-                //SwiperController().next();
+          headerTextStyle: TextStyle(
+              color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+          pageSnapping: true,
+          weekFormat: false,
+          showHeader: false,
+          thisMonthDayBorderColor: Colors.grey,
 
-                setState(() {
-                  if ((index >= oldindex && (index - oldindex != 11)) ||
-                      (index - oldindex == -11)) {
-                    _targetDateTime = DateTime(
-                        _targetDateTime.year, _targetDateTime.month + 1);
-                    print(index);
-                    print(oldindex);
-                    print(_targetDateTime);
-                    oldindex = index;
-                    _currentYear = _targetDateTime.year;
-                  } else {
-                    _targetDateTime = DateTime(
-                        _targetDateTime.year, _targetDateTime.month - 1);
-                    print(index);
-                    print(oldindex);
-                    print(_targetDateTime);
-                    oldindex = index;
-                     _currentYear = _targetDateTime.year;
-                  }
-                });
-              },
-            ),
+          height: _size.height * 0.40,
+          childAspectRatio:
+              MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 1.0
+                  : 1.5,
+          targetDateTime: _targetDateTime,
+
+          /// weekday
+          weekdayTextStyle: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+          weekendTextStyle: TextStyle(
+              color: Theme.of(context).primaryColorLight,
+              fontWeight: FontWeight.bold,
+              fontSize: 17),
+          daysTextStyle: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+          todayTextStyle: TextStyle(
+            color: Theme.of(context).primaryColor,
           ),
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                /* 
-                Container(
-                  padding: EdgeInsets.only(left: 20, top: 30),
-                  alignment: Alignment.centerLeft,
-                child: Text("Calendario",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                          color: Colors.blue)),
-                ),*/
-                //custom icon
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: _calendarCarousel,
+          minSelectedDate: DateTime(1970, 1, 1),
+          maxSelectedDate: DateTime.now().add(Duration(days: 3650)),
+          onCalendarChanged: (DateTime date) {
+            this.setState(() {
+              _targetDateTime = date;
+            });
+          },
+          isScrollable: false,
+          onDayLongPressed: (DateTime date) {},
+        );
+
+        return new Scaffold(
+            backgroundColor: Colors.blue,
+          /*  bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  title: Text('Home'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.business),
+                  title: Text('Todos'),
                 ),
               ],
+              selectedItemColor: Colors.blue,
+            ),*/
+            appBar: AppBar(
+              actions: <Widget>[
+                Container(
+                  margin: EdgeInsets.only(top: 15, right: 10),
+                  child: Text(_currentYear.toString(),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20)),
+                )
+              ],
+              elevation: 0.0,
+              backgroundColor: Colors.blue,
             ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30)),
-                color: Colors.white,
-              ),
-              height: 180.0,
-              alignment: Alignment.center,
-              padding: EdgeInsets.only(top: 30),
-              child: FutureBuilder(
-                future: _getEventsList(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    List<Event> data = snapshot.data;
-                    return SizedBox(
-                      height: 150,
-                      child: _calendarsListView(data),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
-                  }
-                  return Container();
-                },
-              ),
-            ),
-          )
-        ]));
-  }
-
-  ListView _calendarsListView(data) {
-    return ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: data.length,
-        itemBuilder: (context, index) {
-          return _tile(data[index].title, Icons.work, context);
-        });
-  }
-
-  Ink _tile(String title, IconData icon, context) => Ink(
-          child: InkWell(
-        splashColor: Colors.blue,
-        child: Container(
-          padding: EdgeInsets.all(20),
-          margin: EdgeInsets.all(10),
-          width: 180,
-          decoration: BoxDecoration(
-            /*
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.blue[600],
-                    Colors.blue,
-                    Colors.tealAccent[400],
-                    Colors.tealAccent[700]
-                  ]),*/
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            color: _randomColor.randomColor(
-                colorBrightness: ColorBrightness.light),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(
-                Icons.calendar_today,
-                size: 30,
-                color: Colors.white,
-              ),
-              SizedBox(height: 10),
-              Text(
-                title,
-                style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 20,
-                    color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ));
-
-  Future<List<Event>> _getEventsList() async {
-    var values = currentEvents;
-    //print(currentEvents);
-    //await Future.delayed(Duration(seconds: 2));
-
-    return values;
+            body:SafeArea(top:true,bottom:true,child: SlidingUpPanel(
+                minHeight: 0,
+                controller: _pc,
+                panel: Center(
+                  child: Text("This is the sliding Widget"),
+                ),
+                body: Column(children: <Widget>[
+                  Expanded(flex: 2,child:
+                  Container(
+                    margin: EdgeInsets.only(bottom: 30),
+                    alignment: Alignment.center,
+                    child: new Swiper(
+                      itemBuilder: (BuildContext context, int index) {
+                        return new Container(
+                            alignment: Alignment.center,
+                            child: Text(this.months[index],
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.bold)));
+                      },
+                      itemCount: months.length,
+                      pagination: null,
+                      control: null,
+                      viewportFraction: 0.48,
+                      fade: 0.05,
+                      scale: 0.3,
+                      onIndexChanged: (index) {
+                        setState(() {
+                          if ((index >= oldindex && (index - oldindex != 11)) ||
+                              (index - oldindex == -11)) {
+                            _targetDateTime = DateTime(_targetDateTime.year,
+                                _targetDateTime.month + 1);
+                            oldindex = index;
+                            _currentYear = _targetDateTime.year;
+                          } else {
+                            _targetDateTime = DateTime(_targetDateTime.year,
+                                _targetDateTime.month - 1);
+                            oldindex = index;
+                            _currentYear = _targetDateTime.year;
+                          }
+                        });
+                      },
+                    ),
+                  ),),
+                  Expanded(flex: 2,
+                    child: 
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 30.0),
+                          child: _calendarCarousel,
+                        ),
+                      ],
+                    ),
+                  ),),
+                   Expanded(child:Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30)),
+                      color: Colors.white,
+                    ),
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 30),
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: EventiList(eventi: state.eventi)),
+                  ))
+                ]))));
+      } else if (state is Loading) {
+        return Container(
+          color: Colors.white,
+        );
+      } else {
+        return Center(
+          child: Text('failed to fetch posts'),
+        );
+      }
+    });
   }
 }

@@ -1,13 +1,19 @@
-import 'package:calendar/calendarListView.dart';
+import 'package:bloc/bloc.dart';
+import 'package:calendar/blocs/evento/evento_bloc.dart';
+import 'package:calendar/blocs/evento/evento.dart';
+import 'package:calendar/showCalendar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:googleapis/calendar/v3.dart' as ca;
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'http_client.dart';
+import 'blocs/simple_bloc_delegate.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  // BlocSupervisor oversees Blocs and delegates to BlocDelegate.
+  // We can set the BlocSupervisor's delegate to an instance of `SimpleBlocDelegate`.
+  // This will allow us to handle all transitions and errors in SimpleBlocDelegate.
+  BlocSupervisor.delegate = SimpleBlocDelegate();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -17,10 +23,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
-      home: LoginPage(title: 'Google Drive'),
+      home: BlocProvider<EventoListBloc>(create: (context) {
+        return EventoListBloc()..add(GetEventos());
+      },
+      child: ShowCalendar(title: "Homepage",),
+  )
     );
   }
 }
+/*
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key, this.title}) : super(key: key);
@@ -199,3 +210,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+*/
