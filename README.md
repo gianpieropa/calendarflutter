@@ -2,6 +2,10 @@
 
 A new Flutter project.
 My first attempt to create an app using flutter with BLOC design pattern.
+![GitHub Logo](/exampleimages/event.png)![GitHub Logo](/exampleimages/noevent.png)![GitHub Logo](/exampleimages/addevent.png)
+
+
+
 
 ## Next features
 * Synchronize with google calendar
