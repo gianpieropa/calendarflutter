@@ -10,7 +10,8 @@ class EventiList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return ListView.builder(
+    if(eventi.length> 0 ){
+       return ListView.builder(
        // scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         physics: ClampingScrollPhysics(),
@@ -21,5 +22,10 @@ class EventiList extends StatelessWidget {
               evento: evento,
             );
           });
+    }
+    else{
+      return Image(image:AssetImage('assets/no_events.png'));
+    }
+     
   }
 }

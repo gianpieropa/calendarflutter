@@ -16,25 +16,28 @@ class EventoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _queryData = MediaQuery.of(context);
+
     return Dismissible(
-      onDismissed: (direction){
-        BlocProvider.of<EventoListBloc>(context)
+        onDismissed: (direction) {
+          BlocProvider.of<EventoListBloc>(context)
               .add(DeleteEvento(evento: evento));
-      } ,
+        },
         key: Key(evento.id.toString()),
         child: Container(
-            margin: EdgeInsets.only(left: 30, right: 30),
+            margin: EdgeInsets.symmetric(
+              horizontal: _queryData.size.width * 0.08,
+            ),
             child: Container(
-              margin: EdgeInsets.only(bottom: 20),
+              margin: EdgeInsets.only(bottom:  _queryData.size.height * 0.03),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 color: Colors.white,
               ),
-              height: 100,
+              height:  _queryData.size.height * 0.1,
               child: Row(
                 children: <Widget>[
                   Container(
-                      height: 100,
                       width: 7,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
@@ -44,22 +47,22 @@ class EventoItem extends StatelessWidget {
                       )),
                   Column(children: <Widget>[
                     Container(
-                      margin: EdgeInsets.only(top: 20, left: 20),
+                      margin: EdgeInsets.only(top:  _queryData.size.height * 0.01, left:  _queryData.size.width * 0.02),
                       child: Text(
                         formatter.format(evento.dataInizio).toString(),
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            fontSize: 14,
+                            fontSize:  _queryData.textScaleFactor * 10,
                             color: Colors.grey),
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 10, left: 20),
+                      margin: EdgeInsets.only(top:  _queryData.size.height * 0.01, left:  _queryData.size.width * 0.02),
                       child: Text(
                         evento.descrizione,
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            fontSize: 20,
+                            fontSize:  _queryData.textScaleFactor * 16,
                             color: Colors.black),
                       ),
                     )

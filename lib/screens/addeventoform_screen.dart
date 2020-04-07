@@ -77,15 +77,10 @@ class _AddFormState extends State<AddForm> {
 
   @override
   Widget build(BuildContext context) {
+    final _queryData = MediaQuery.of(context);
     return BlocBuilder<AddFormBloc, AddFormState>(
       builder: (context, state) {
         if (state.formSubmittedSuccessfully) {
-          final FormState form = _formKey.currentState;
-          form.save();
-
-          BlocProvider.of<EventoListBloc>(context)
-              .add(AddEvento(evento: newEvento));
-
           return SuccessDialog(onDismissed: () {
             _dataController.clear();
             _descrizioneController.clear();
@@ -99,10 +94,12 @@ class _AddFormState extends State<AddForm> {
             children: <Widget>[
               Text(
                 "Inserisci evento",
-                style: TextStyle(color: Colors.black, fontSize: 20),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: _queryData.textScaleFactor * 17),
               ),
               SizedBox(
-                height: 20,
+                height: _queryData.size.height * 0.02,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,21 +110,22 @@ class _AddFormState extends State<AddForm> {
                         Text("Data inizio",
                             textAlign: TextAlign.left,
                             style: TextStyle(
-                                color: Colors.grey[400], fontSize: 15)),
+                                color: Colors.grey[400],
+                                fontSize: _queryData.textScaleFactor * 13)),
                         SizedBox(
-                          height: 5,
+                          height: _queryData.size.height * 0.02,
                         ),
                         Container(
-                          width: 160,
-                          height: 40,
+                          width: _queryData.size.width * 0.40,
+                          height: _queryData.size.height * 0.05,
                           child: TextFormField(
                               onTap: () {
-                                _chooseDateFine(
-                                    context, _dataFineController.text);
+                                _chooseDate(
+                                    context, _dataController.text);
                               },
-                              controller: _dataFineController,
+                              controller: _dataController,
                               decoration: new InputDecoration(
-                                contentPadding: EdgeInsets.all(10.0),
+                                contentPadding: EdgeInsets.only(left:10),
                                 hintText: "",
                                 filled: true,
                                 fillColor: Colors.lightBlue[50],
@@ -159,20 +157,21 @@ class _AddFormState extends State<AddForm> {
                         Text("Data fine",
                             textAlign: TextAlign.left,
                             style: TextStyle(
-                                color: Colors.grey[400], fontSize: 15)),
+                                color: Colors.grey[400],
+                                fontSize: _queryData.textScaleFactor * 13)),
                         SizedBox(
-                          height: 5,
+                          height: _queryData.size.height * 0.02,
                         ),
                         Container(
-                          width: 160,
-                          height: 40,
+                          width: _queryData.size.width * 0.40,
+                          height: _queryData.size.height * 0.05,
                           child: TextFormField(
                             onTap: () {
-                              _chooseDate(context, _dataController.text);
+                              _chooseDateFine(context, _dataFineController.text);
                             },
-                            controller: _dataController,
+                            controller: _dataFineController,
                             decoration: new InputDecoration(
-                              contentPadding: EdgeInsets.all(10.0),
+                                contentPadding: EdgeInsets.only(left:10),
                               filled: true,
                               fillColor: Colors.lightBlue[50],
                               enabledBorder: new OutlineInputBorder(
@@ -200,12 +199,19 @@ class _AddFormState extends State<AddForm> {
                       ])
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(
+                height: _queryData.size.height * 0.02,
+              ),
               Text("Descrizione",
                   textAlign: TextAlign.left,
-                  style: TextStyle(color: Colors.grey[400], fontSize: 15)),
+                  style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: _queryData.textScaleFactor * 13)),
+              SizedBox(
+                height: _queryData.size.height * 0.02,
+              ),
               Container(
-                height: 50,
+                height: _queryData.size.height * 0.07,
                 child: TextFormField(
                   controller: _descrizioneController,
                   decoration: new InputDecoration(
@@ -230,7 +236,9 @@ class _AddFormState extends State<AddForm> {
                   onSaved: (val) => newEvento.descrizione = val,
                 ),
               ),
-               SizedBox(height: 20,),
+              SizedBox(
+                height: _queryData.size.height * 0.05,
+              ),
               GestureDetector(
                 onTap: state.isFormValid ? _onSubmitPressed : null,
                 child: Row(
@@ -238,25 +246,33 @@ class _AddFormState extends State<AddForm> {
                     Expanded(
                       child: Container(
                         alignment: Alignment.center,
-                        width: 100,
+                        width: _queryData.size.width * 0.1,
                         height: 40,
                         decoration: BoxDecoration(
                             color: Colors.blue,
-                            borderRadius: BorderRadius.only(topLeft:Radius.circular(10),bottomLeft:Radius.circular(10))),
-                            child: Text("Aggiungi",style: TextStyle(color:Colors.white),),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                bottomLeft: Radius.circular(10))),
+                        child: Text(
+                          "Aggiungi",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
-                   
-                    Container(
-                      width: 60,
-                      height: 40,
-                      decoration: BoxDecoration(
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: _queryData.size.width * 0.15,
+                        height: 40,
+                        decoration: BoxDecoration(
                             color: Colors.lightBlue,
-                            borderRadius: BorderRadius.only(topRight:Radius.circular(10),bottomRight:Radius.circular(10))),
-                    
-                      child: Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                                bottomRight: Radius.circular(10))),
+                        child: Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -282,7 +298,7 @@ class _AddFormState extends State<AddForm> {
   }
 
   void _onDataFineChanged() {
-    _myFormBloc.add(DataFineChanged(data: _dataController.text));
+    _myFormBloc.add(DataFineChanged(data: _dataFineController.text));
   }
 
   void _onDescrizioneChanged() {
@@ -291,6 +307,11 @@ class _AddFormState extends State<AddForm> {
   }
 
   void _onSubmitPressed() {
+    final FormState form = _formKey.currentState;
+    form.save();
+
+    BlocProvider.of<EventoListBloc>(context).add(AddEvento(evento: newEvento));
+
     _myFormBloc.add(FormSubmitted());
   }
 }

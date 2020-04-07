@@ -1,5 +1,4 @@
 import 'package:calendar/blocs/blocs.dart';
-import 'package:calendar/models/evento_model.dart';
 import 'package:calendar/screens/addeventoform_screen.dart';
 import 'package:calendar/widgets/eventi_list.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +72,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    final _size = MediaQuery.of(context).size;
+    final _queryData = MediaQuery.of(context);
     return BlocBuilder<EventoListBloc, EventoListState>(
         builder: (context, state) {
       if (state is Loaded) {
@@ -106,7 +105,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                 ),
                 child: Text(
                   event.date.day.toString(),
-                  style: TextStyle(color: Colors.white, fontSize: 12),
+                  style: TextStyle(color: Colors.white, fontSize:_queryData.textScaleFactor* 13),
                 ));
           },
           selectedDayButtonColor: Colors.blue,
@@ -115,27 +114,24 @@ class _ShowCalendarState extends State<ShowCalendar> {
           selectedDayTextStyle: TextStyle(
             color: Colors.white,
           ),
-          headerTextStyle: TextStyle(
-              color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
           pageSnapping: true,
           weekFormat: false,
           showHeader: false,
-
-          height: 270,
-          childAspectRatio: 0.8,
+          height: _queryData.size.height* 0.35,
+          childAspectRatio: _queryData.devicePixelRatio*0.35,
           targetDateTime: _targetDateTime,
 
           /// weekday
           weekdayTextStyle: TextStyle(
               color: Colors.grey[400],
               fontWeight: FontWeight.w500,
-              fontSize: 17),
+              fontSize:_queryData.textScaleFactor* 14),
           weekendTextStyle: TextStyle(
               color: Theme.of(context).primaryColorLight,
-              fontWeight: FontWeight.bold,
-              fontSize: 17),
+              fontWeight: FontWeight.w500,
+              fontSize:_queryData.textScaleFactor* 13),
           daysTextStyle: TextStyle(
-              color: Colors.black, fontWeight: FontWeight.w500, fontSize: 14),
+              color: Colors.black, fontWeight: FontWeight.w500,  fontSize:_queryData.textScaleFactor* 13),
           todayTextStyle: TextStyle(
             color: Theme.of(context).primaryColor,
           ),
@@ -153,7 +149,8 @@ class _ShowCalendarState extends State<ShowCalendar> {
 
         return new Scaffold(
             backgroundColor: Colors.blue,
-            /*  bottomNavigationBar: BottomNavigationBar(
+            /*
+              bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
@@ -166,19 +163,23 @@ class _ShowCalendarState extends State<ShowCalendar> {
               ],
               selectedItemColor: Colors.blue,
             ),*/
-            appBar: AppBar(
-              actions: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(top: 15, right: 10),
-                  child: Text(_currentYear.toString(),
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20)),
-                )
-              ],
-              elevation: 0.0,
-              backgroundColor: Colors.blue,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(_queryData.size.height*0.065),
+              child:
+                AppBar(
+                  actions: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(top: 10, right: 5),
+                      child: Text(_currentYear.toString(),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: _queryData.textScaleFactor*17)),
+                    )
+                  ],
+                  elevation: 0.0,
+                  backgroundColor: Colors.blue,
+                ),
             ),
             body: SlidingUpPanel(
                 borderRadius: BorderRadius.only(
@@ -189,7 +190,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                 maxHeight: 300,
                 controller: _pc,
                 panel: Container(
-                  padding: EdgeInsets.only(top:30,left:30, right: 30),
+                  padding: EdgeInsets.only(top: _queryData.size.height* 0.05,left: _queryData.size.width* 0.05, right: _queryData.size.width* 0.05),
                   child: BlocProvider(
                     create: (context) => AddFormBloc(),
                     child: AddForm(),
@@ -199,8 +200,8 @@ class _ShowCalendarState extends State<ShowCalendar> {
                     child: Column(mainAxisSize: MainAxisSize.min, children: <
                         Widget>[
                   Container(
-                    height: 50,
-                    margin: EdgeInsets.only(bottom: 30),
+                    height: _queryData.size.height*0.06,
+                    margin: EdgeInsets.only(bottom:  _queryData.size.height*0.02),
                     alignment: Alignment.center,
                     child: new Swiper(
                       itemBuilder: (BuildContext context, int index) {
@@ -209,13 +210,13 @@ class _ShowCalendarState extends State<ShowCalendar> {
                             child: Text(this.months[index],
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 40,
+                                    fontSize: _queryData.textScaleFactor*30,
                                     fontWeight: FontWeight.bold)));
                       },
                       itemCount: months.length,
                       pagination: null,
                       control: null,
-                      viewportFraction: 0.48,
+                      viewportFraction:_queryData.devicePixelRatio*0.12,
                       fade: 0.05,
                       scale: 0.3,
                       onIndexChanged: (index) {
@@ -240,21 +241,21 @@ class _ShowCalendarState extends State<ShowCalendar> {
                     decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.all(Radius.circular(24.0))),
-                    margin: EdgeInsets.symmetric(horizontal: 30.0),
-                    padding: EdgeInsets.all(30.0),
+                    margin: EdgeInsets.symmetric(horizontal: _queryData.size.width*0.08),
+                    padding: EdgeInsets.all(_queryData.size.width*0.06),
                     child: _calendarCarousel,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Container(
-                          margin: EdgeInsets.all(30),
+                          margin: EdgeInsets.symmetric(horizontal:_queryData.size.width*0.08),
                           child: Text(
                             "Eventi",
-                            style: TextStyle(color: Colors.white, fontSize: 20),
+                            style: TextStyle(color: Colors.white, fontSize: _queryData.textScaleFactor*17),
                           )),
                       Container(
-                          margin: EdgeInsets.all(30),
+                          margin: EdgeInsets.symmetric(horizontal:_queryData.size.width*0.08),
                           child: IconButton(
                             icon: Icon(Icons.add, color: Colors.white),
                             onPressed: () {
@@ -270,7 +271,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                     ),
                   ),
                   Container(
-                    height: 80,
+                    height: _queryData.size.height*0.2,
                   )
                 ]))));
       } else if (state is Loading) {
