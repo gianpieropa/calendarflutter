@@ -78,6 +78,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
         builder: (context, state) {
       if (state is Loaded) {
         var eventi = state.eventi;
+        _markedDateMap.events.clear();
         for (var i = 0; i < eventi.length; i++) {
           _markedDateMap.events.putIfAbsent(eventi[i].dataInizio, () => []);
           _markedDateMap.events[eventi[i].dataInizio].add(new Event(
@@ -90,7 +91,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
               _currentDate = date;
             });
             //_pc.open();
-            // BlocProvider.of<EventoListBloc>(context).add(AddEvento(evento:Evento(dataFine: date,dataInizio: date,descrizione: "agginto")));
+             BlocProvider.of<EventoListBloc>(context).add(FiltraEventos(data: date));
           },
           todayButtonColor: Colors.transparent,
           markedDatesMap: _markedDateMap,
@@ -187,9 +188,12 @@ class _ShowCalendarState extends State<ShowCalendar> {
                 minHeight: 0,
                 maxHeight: 300,
                 controller: _pc,
-                panel: BlocProvider(
-                  create: (context) => AddFormBloc(),
-                  child: AddForm(),
+                panel: Container(
+                  padding: EdgeInsets.only(top:30,left:30, right: 30),
+                  child: BlocProvider(
+                    create: (context) => AddFormBloc(),
+                    child: AddForm(),
+                  ),
                 ),
                 body: SingleChildScrollView(
                     child: Column(mainAxisSize: MainAxisSize.min, children: <
@@ -262,8 +266,11 @@ class _ShowCalendarState extends State<ShowCalendar> {
                   Flexible(
                     fit: FlexFit.loose,
                     child: EventiList(
-                      eventi: state.eventi,
+                      eventi: state.eventiFiltrati,
                     ),
+                  ),
+                  Container(
+                    height: 80,
                   )
                 ]))));
       } else if (state is Loading) {

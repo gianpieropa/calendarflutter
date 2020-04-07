@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:calendar/blocs/evento/evento_bloc.dart';
 import 'package:calendar/blocs/evento/evento.dart';
-import 'package:calendar/showCalendar.dart';
+import 'package:calendar/screens/showCalendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Google Drive',
       theme: ThemeData(
         primarySwatch: Colors.blue,

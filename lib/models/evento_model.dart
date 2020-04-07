@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:equatable/equatable.dart';
-
 Evento eventoFromJson(String str) => Evento.fromMap(json.decode(str));
 
 String eventoToJson(Evento data) => json.encode(data.toMap());

@@ -95,58 +95,172 @@ class _AddFormState extends State<AddForm> {
         return Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              TextFormField(
-                onTap: () {
-                  _chooseDate(context, _dataController.text);
-                },
-                controller: _dataController,
-                decoration: InputDecoration(
-                  icon: Icon(Icons.calendar_today),
-                  labelText: 'Data',
-                ),
-                keyboardType: TextInputType.datetime,
-                autovalidate: true,
-                validator: (_) {
-                  return state.isDataValid ? null : 'Invalid Data';
-                },
-                onSaved: (val) =>
-                    newEvento.dataInizio= DateFormat.yMd().parse(val),
+              Text(
+                "Inserisci evento",
+                style: TextStyle(color: Colors.black, fontSize: 20),
               ),
-              TextFormField(
-                  onTap: () {
-                    _chooseDateFine(context, _dataFineController.text);
-                  },
-                  controller: _dataFineController,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.calendar_today),
-                    labelText: 'Data',
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text("Data inizio",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                color: Colors.grey[400], fontSize: 15)),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          width: 160,
+                          height: 40,
+                          child: TextFormField(
+                              onTap: () {
+                                _chooseDateFine(
+                                    context, _dataFineController.text);
+                              },
+                              controller: _dataFineController,
+                              decoration: new InputDecoration(
+                                contentPadding: EdgeInsets.all(10.0),
+                                hintText: "",
+                                filled: true,
+                                fillColor: Colors.lightBlue[50],
+                                enabledBorder: new OutlineInputBorder(
+                                  borderRadius: new BorderRadius.circular(15.0),
+                                  borderSide: new BorderSide(
+                                      color: Colors.lightBlue[50]),
+                                ),
+                                focusedBorder: new OutlineInputBorder(
+                                  borderRadius: new BorderRadius.circular(15.0),
+                                  borderSide: new BorderSide(
+                                      color: Colors.lightBlue[50]),
+                                ),
+                                border: new OutlineInputBorder(
+                                  borderRadius: new BorderRadius.circular(15.0),
+                                  borderSide: new BorderSide(
+                                      color: Colors.lightBlue[50]),
+                                ),
+                              ),
+                              keyboardType: TextInputType.datetime,
+                              autovalidate: true,
+                              onSaved: (val) => newEvento.dataFine =
+                                  DateFormat.yMd().parse(val)),
+                        ),
+                      ]),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text("Data fine",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                color: Colors.grey[400], fontSize: 15)),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          width: 160,
+                          height: 40,
+                          child: TextFormField(
+                            onTap: () {
+                              _chooseDate(context, _dataController.text);
+                            },
+                            controller: _dataController,
+                            decoration: new InputDecoration(
+                              contentPadding: EdgeInsets.all(10.0),
+                              filled: true,
+                              fillColor: Colors.lightBlue[50],
+                              enabledBorder: new OutlineInputBorder(
+                                borderRadius: new BorderRadius.circular(15.0),
+                                borderSide:
+                                    new BorderSide(color: Colors.lightBlue[50]),
+                              ),
+                              focusedBorder: new OutlineInputBorder(
+                                borderRadius: new BorderRadius.circular(15.0),
+                                borderSide:
+                                    new BorderSide(color: Colors.lightBlue[50]),
+                              ),
+                              border: new OutlineInputBorder(
+                                borderRadius: new BorderRadius.circular(15.0),
+                                borderSide:
+                                    new BorderSide(color: Colors.lightBlue[50]),
+                              ),
+                            ),
+                            keyboardType: TextInputType.datetime,
+                            autovalidate: true,
+                            onSaved: (val) => newEvento.dataInizio =
+                                DateFormat.yMd().parse(val),
+                          ),
+                        ),
+                      ])
+                ],
+              ),
+              SizedBox(height: 10),
+              Text("Descrizione",
+                  textAlign: TextAlign.left,
+                  style: TextStyle(color: Colors.grey[400], fontSize: 15)),
+              Container(
+                height: 50,
+                child: TextFormField(
+                  controller: _descrizioneController,
+                  decoration: new InputDecoration(
+                    contentPadding: EdgeInsets.all(10.0),
+                    filled: true,
+                    fillColor: Colors.lightBlue[50],
+                    enabledBorder: new OutlineInputBorder(
+                      borderRadius: new BorderRadius.circular(15.0),
+                      borderSide: new BorderSide(color: Colors.lightBlue[50]),
+                    ),
+                    focusedBorder: new OutlineInputBorder(
+                      borderRadius: new BorderRadius.circular(15.0),
+                      borderSide: new BorderSide(color: Colors.lightBlue[50]),
+                    ),
+                    border: new OutlineInputBorder(
+                      borderRadius: new BorderRadius.circular(15.0),
+                      borderSide: new BorderSide(color: Colors.lightBlue[50]),
+                    ),
                   ),
-                  keyboardType: TextInputType.datetime,
+                  keyboardType: TextInputType.text,
                   autovalidate: true,
-                  validator: (_) {
-                    return state.isDataFineValid ? null : 'Invalid Data';
-                  },
-                  onSaved: (val) =>
-                      newEvento.dataFine = DateFormat.yMd().parse(val)),
-              TextFormField(
-                controller: _descrizioneController,
-                decoration: InputDecoration(
-                  icon: Icon(Icons.description),
-                  labelText: 'Descrizione',
+                  onSaved: (val) => newEvento.descrizione = val,
                 ),
-                keyboardType: TextInputType.text,
-                autovalidate: true,
-                validator: (_) {
-                  return state.isDescrizioneValid
-                      ? null
-                      : 'Invalid Descrizione';
-                },
-                onSaved: (val) => newEvento.descrizione = val,
               ),
-              RaisedButton(
-                onPressed: state.isFormValid ? _onSubmitPressed : null,
-                child: Text('Submit'),
+               SizedBox(height: 20,),
+              GestureDetector(
+                onTap: state.isFormValid ? _onSubmitPressed : null,
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        width: 100,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.only(topLeft:Radius.circular(10),bottomLeft:Radius.circular(10))),
+                            child: Text("Aggiungi",style: TextStyle(color:Colors.white),),
+                      ),
+                    ),
+                   
+                    Container(
+                      width: 60,
+                      height: 40,
+                      decoration: BoxDecoration(
+                            color: Colors.lightBlue,
+                            borderRadius: BorderRadius.only(topRight:Radius.circular(10),bottomRight:Radius.circular(10))),
+                    
+                      child: Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

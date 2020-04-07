@@ -4,14 +4,16 @@ import 'package:meta/meta.dart';
 @immutable
 abstract class EventoListEvent {
   final Evento evento;
-
-  EventoListEvent({this.evento});
+  final DateTime data;
+  EventoListEvent({this.evento,this.data});
 }
 
 class GetEventos extends EventoListEvent {
   GetEventos() : super();
 }
-
+class FiltraEventos extends EventoListEvent {
+  FiltraEventos({@required DateTime data}) : super(data:data);
+}
 class DeleteEvento extends EventoListEvent {
   DeleteEvento({@required Evento evento}) : super(evento: evento);
 }

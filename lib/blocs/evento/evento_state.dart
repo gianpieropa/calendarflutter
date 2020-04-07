@@ -5,8 +5,9 @@ import 'package:meta/meta.dart';
 abstract class EventoListState {
   final List<Evento> eventi;
   final String message;
+  final List<Evento> eventiFiltrati;
 
-  EventoListState({this.eventi, this.message});
+  EventoListState({this.eventi, this.message, this.eventiFiltrati});
 }
   
 class InitialEventoListState extends EventoListState {}
@@ -18,5 +19,5 @@ class Error extends EventoListState {
 }
 
 class Loaded extends EventoListState {
-  Loaded({@required List<Evento> eventi}) : super(eventi: eventi);
+  Loaded({@required List<Evento> eventi, @required List<Evento> eventiFiltrati}) : super(eventi: eventi,eventiFiltrati:eventiFiltrati);
 }
