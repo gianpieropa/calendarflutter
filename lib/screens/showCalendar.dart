@@ -149,7 +149,6 @@ class _ShowCalendarState extends State<ShowCalendar> {
 
         return new Scaffold(
             backgroundColor: Colors.blue,
-            /*
               bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -157,12 +156,12 @@ class _ShowCalendarState extends State<ShowCalendar> {
                   title: Text('Home'),
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.business),
+                  icon: Icon(Icons.check),
                   title: Text('Todos'),
                 ),
               ],
               selectedItemColor: Colors.blue,
-            ),*/
+            ),
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(_queryData.size.height*0.065),
               child:
@@ -187,7 +186,7 @@ class _ShowCalendarState extends State<ShowCalendar> {
                   topRight: Radius.circular(24.0),
                 ),
                 minHeight: 0,
-                maxHeight: 300,
+                maxHeight: _queryData.size.height* 0.5,
                 controller: _pc,
                 panel: Container(
                   padding: EdgeInsets.only(top: _queryData.size.height* 0.05,left: _queryData.size.width* 0.05, right: _queryData.size.width* 0.05),
