@@ -1,4 +1,4 @@
-import 'package:http/io_client.dart';
+/*import 'package:http/io_client.dart';
 import 'package:http/http.dart';
 
 class GoogleHttpClient extends IOClient {
@@ -14,4 +14,4 @@ class GoogleHttpClient extends IOClient {
   Future<Response> head(Object url, {Map<String, String> headers}) =>
       super.head(url, headers: headers..addAll(_headers));
 
-}
+}*/
