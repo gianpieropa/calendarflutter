@@ -50,5 +50,13 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
         yield Error(errorMessage: e.toString());
       }
     } 
+    else if (event is ReorderTodo) {
+      try {
+        List<Todo> todos = await _userRepository.reorderTodos(event.todos,event.newIndex,event.oldIndex);
+        yield Loaded(todos: todos);
+      } catch (e) {
+        yield Error(errorMessage: e.toString());
+      }
+    } 
   }
 }

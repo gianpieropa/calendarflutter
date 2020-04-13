@@ -13,4 +13,5 @@ class TodoRepository {
   Future deleteTodoById(int id) => todoDao.deleteTodo(id);
   
   Future deleteAllTodos() => todoDao.deleteAllTodos();
+   Future reorderTodos(List<Todo> todos,int newIndex, int oldIndex) => todoDao.reorderTodos(todos, newIndex, oldIndex);
 }

@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 @immutable
 abstract class TodoListEvent {
   final Todo todo;
+
   TodoListEvent({this.todo});
 }
 
@@ -19,4 +20,10 @@ class AddTodo extends TodoListEvent {
 }
 class UpdateTodo extends TodoListEvent {
   UpdateTodo({@required Todo todo}) : super(todo: todo);
+}
+class ReorderTodo extends TodoListEvent {
+    final List<Todo> todos;
+    final int oldIndex;
+    final int newIndex;
+  ReorderTodo({@required this.todos,@required this.oldIndex,@required this.newIndex}) ;
 }
