@@ -1,11 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:calendar/blocs/evento/evento_bloc.dart';
 import 'package:calendar/blocs/evento/evento.dart';
+import 'package:calendar/blocs/navbar/navbar_bloc.dart';
+import 'package:calendar/blocs/navbar/navbar_event.dart';
+import 'package:calendar/blocs/todo/todo.dart';
 import 'package:calendar/screens/showCalendar.dart';
+import 'package:calendar/screens/todo_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'blocs/navbar/navbar.dart';
 import 'blocs/simple_bloc_delegate.dart';
+import 'blocs/todo/todo_bloc.dart';
 
 void main() {
   // BlocSupervisor oversees Blocs and delegates to BlocDelegate.
@@ -15,24 +21,111 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => new _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  List<String> _months;
+  @override
+  void initState() {
+    super.initState();
+    _months = _ordinaMesi();
+  }
+
+  List<String> _ordinaMesi() {
+    List<String> months = [
+      'Gennaio',
+      'Febbraio',
+      'Marzo',
+      'Aprile',
+      'Maggio',
+      'Giugno',
+      'Luglio',
+      'Agosto',
+      'Settembre',
+      'Ottobre',
+      'Novembre',
+      'Dicembre'
+    ];
+    var nuovimesi = List<String>(12);
+    int currentMonth = DateTime.now().month;
+    for (int i = 0; i < 12; i++) {
+      if (currentMonth > 12) {
+        currentMonth = 1;
+      }
+      nuovimesi[i] = months[currentMonth - 1];
+      currentMonth++;
+    }
+    for (int i = 0; i < 12; i++) {
+      print(nuovimesi[i]);
+    }
+    return nuovimesi;
+  }
+
   @override
   Widget build(BuildContext context) {
+    //  final _queryData = MediaQuery.of(context);
+    var page;
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Google Drive',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: BlocProvider<EventoListBloc>(create: (context) {
-        return EventoListBloc()..add(GetEventos());
-      },
-      child:SafeArea(
-                top: true,
-                bottom: true,
-                child:  ShowCalendar(title: "Homepage",),
-  ))
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'Google Drive',
+        theme: ThemeData(unselectedWidgetColor: Colors.blue,
+          primarySwatch: Colors.blue,
+        ),
+        home: MultiBlocProvider(
+            providers: [
+              BlocProvider<NavbarBloc>(
+                create: (context) {
+                  return NavbarBloc();
+                },
+              ),
+              BlocProvider<EventoListBloc>(
+                create: (context) {
+                  return EventoListBloc()..add(GetEventos());
+                },
+              ),
+              BlocProvider<TodoListBloc>(
+                create: (context) {
+                  return TodoListBloc()..add(GetTodos());
+                },
+              ),
+            ],
+            child:
+                BlocBuilder<NavbarBloc, NavbarState>(builder: (context, state) {
+              if (state.index == 0) {
+                page = ShowCalendar(
+                  months: _months,
+                );
+              } else {
+                page = TodosScreen();
+              }
+              return SafeArea(
+                  top: true,
+                  bottom: true,
+                  child: Scaffold(
+                      backgroundColor: Colors.blue,
+                      bottomNavigationBar: BottomNavigationBar(
+                        currentIndex: state.index,
+                        onTap: (index) {
+                          BlocProvider.of<NavbarBloc>(context)
+                              .add(ChangePage(index: index));
+                        },
+                        items: const <BottomNavigationBarItem>[
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.home),
+                            title: Text('Home'),
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.check),
+                            title: Text('Todos'),
+                          ),
+                        ],
+                        selectedItemColor: Colors.blue,
+                      ),
+                      body: page));
+            })));
   }
 }
 /*

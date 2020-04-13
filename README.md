@@ -9,7 +9,7 @@ My first attempt to create an app using flutter with BLOC design pattern.
 
 ## Todos:
 * Synchronize with google calendar
-* Add a todo page
+* Add a todo page (Done!)
 * Potrait mode fix
 
 ## Getting Started
